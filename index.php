@@ -22,7 +22,6 @@ foreach ($files as $file)
 			$parts = explode('"', $line);
 			if(substr($parts[0], 0, strlen($ip))==$ip){
 			$response = explode(' ', $parts[2], 3);
-			//echo $cnt." ". substr($parts[0], 0, strlen($ip))." ". $response[1]."->".$response[2]."<br/>";
 			$bandwidth+=$response[2];
 			}
 		}
