@@ -1,33 +1,33 @@
 <?php
 
-$ip = $argv[1];
-$dir='logfiles';
+$ip = isset($argv[1])?$argv[1]:"";
+$dir='../logfiles';
 $bandwidth=0;
-$timestart = microtime(true);
-
 $files = scandir($dir);
+
 foreach ($files as $file)
 {
 	if(!is_dir($file))
 	{
-		$handle = gzopen('logfiles/'.$file, "rb");
-		$contents = fread($handle, filesize('logfiles/'.$file));
-		$tempfile = fopen("logfiles/temp.gz", "w");
-		fwrite($tempfile, $contents);
-		fclose($tempfile);
-
-		$handle = gzopen("logfiles/temp.gz", "rb");
-		while (!feof($handle)) {
-			$line = fgets($handle);
+		$handle = gzopen('../logfiles/'.$file, "rb");
+		while (!feof($handle)) 
+		{
+			$line= str_replace('\"','', fgets($handle));
 			$parts = explode('"', $line);
-			if(substr($parts[0], 0, strlen($ip))==$ip){
-			$response = explode(' ', $parts[2], 3);
-			$bandwidth+=$response[2];
+			if(!empty($ip)&&substr($parts[0], 0, strlen($ip))!==$ip) continue;
+			else
+			{
+				$response = explode(' ', $parts[2], 3);
+				$bandwidth+=$response[2];
+				$ipstat[$response[1]]=empty($ipstat[$response[1]])?$response[2]:$ipstat[$response[1]]+$response[2];
 			}
+		
 		}
 	}
 }
-$timeEnd=  microtime(true);
-$time = $timeEnd-$timestart;
 
-echo "bandwidth: ".$bandwidth." " .$time;
+echo "total bandwidth: ".$bandwidth."\n";
+foreach ($ipstat as $response=>$responseBandwidth)
+{
+	echo "response: " . $response. " bandwidth: ".$responseBandwidth . " percentage: " .$responseBandwidth*100/$bandwidth."%\n";
+}
